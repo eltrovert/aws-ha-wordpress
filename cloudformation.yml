@@ -1,0 +1,152 @@
+Resources:
+  RDSSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "RDS security group"
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: "0.0.0.0/0"
+      VpcId: "vpc-05c8f743e67755bc3" 
+  RDSInstance:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      DBName: "wordpress"
+      Engine: "mysql"
+      EngineVersion: "5.7"
+      MasterUsername: "wordpress"
+      MasterUserPassword: "password"
+      DBInstanceClass: "db.t2.micro"
+      AllocatedStorage: "20"
+      StorageType: "gp2"
+      DBSubnetGroupName: "default"
+      VPCSecurityGroups:
+        - !Ref RDSSecurityGroup
+      MultiAZ: false
+      PubliclyAccessible: false
+
+
+  EFSSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "EFS security group"
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 2049
+          ToPort: 2049
+          CidrIp: "0.0.0.0/0"
+      VpcId: "vpc-05c8f743e67755bc3" 
+  EFSMountTargetA:
+    Type: "AWS::EFS::MountTarget"
+    Properties:
+      FileSystemId: "fs-066e8e211309d0777"
+      SubnetId: "subnet-088f40d103e0fe35a"
+      SecurityGroups:
+        - !Ref EFSSecurityGroup
+  EFSMountTargetB:
+    Type: "AWS::EFS::MountTarget"
+    Properties:
+      FileSystemId: "fs-066e8e211309d0777"
+      SubnetId: "subnet-0313ec7cf5d6a4b01"
+      SecurityGroups:
+        - !Ref EFSSecurityGroup
+
+  EC2SecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "EC2 security group"
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 22
+          ToPort: 22
+          CidrIp: "0.0.0.0/0"
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "0.0.0.0/0"
+      VpcId: "vpc-05c8f743e67755bc3" 
+  EC2InstanceA:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: "ami-02f3f602d23f1659d"
+      InstanceType: "t2.micro"
+      KeyName: "wordpress-key-pair"
+      NetworkInterfaces:
+        - DeviceIndex: "0"
+          SubnetId: "subnet-088f40d103e0fe35a"
+          PrivateIpAddress: "10.0.0.10"
+          GroupSet:
+            - !Ref EC2SecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y nfs-utils
+          mkdir /mnt/efs
+          mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 ${EFSMountTargetA}.fs-066e8e211309d0777.efs.us-east-1.amazonaws.com:/ /mnt/efs
+  EC2InstanceB:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: "ami-02f3f602d23f1659d"
+      InstanceType: "t2.micro"
+      KeyName: "wordpress-key-pair"
+      NetworkInterfaces:
+        - DeviceIndex: "0"
+          SubnetId: "subnet-0313ec7cf5d6a4b01"
+          PrivateIpAddress: "10.0.16.10"
+          GroupSet:
+            - !Ref EC2SecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y nfs-utils
+          mkdir /mnt/efs
+          mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 ${EFSMountTargetB}.fs-066e8e211309d0777.efs.us-east-1.amazonaws.com:/ /mnt/efs
+
+  LoadBalancerSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Load balancer security group"
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "0.0.0.0/0"
+      VpcId: "vpc-05c8f743e67755bc3" 
+  LoadBalancer:
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Properties:
+      Name: "my-lb"
+      Scheme: "internet-facing"
+      Subnets:
+        - "subnet-088f40d103e0fe35a"
+        - "subnet-0313ec7cf5d6a4b01"
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroup
+  TargetGroup:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+      Name: "my-target-group"
+      Port: 80
+      Protocol: "HTTP"
+      TargetType: "ip"
+      VpcId: "vpc-05c8f743e67755bc3" 
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: "/"
+      HealthCheckPort: "80"
+      HealthCheckProtocol: "HTTP"
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 5
+  Listener:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Properties:
+      DefaultActions:
+        - Type: "forward"
+          TargetGroupArn: !Ref TargetGroup
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: "HTTP"
