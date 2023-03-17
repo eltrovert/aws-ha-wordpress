@@ -20,7 +20,7 @@ Resources:
       DBInstanceClass: "db.t2.micro"
       AllocatedStorage: "20"
       StorageType: "gp2"
-      DBSubnetGroupName: "default"
+      DBSubnetGroupName: "default-vpc-05c8f743e67755bc3"
       VPCSecurityGroups:
         - !Ref RDSSecurityGroup
       MultiAZ: false
