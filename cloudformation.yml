@@ -37,20 +37,6 @@ Resources:
           ToPort: 2049
           CidrIp: "0.0.0.0/0"
       VpcId: "vpc-05c8f743e67755bc3" 
-  EFSMountTargetA:
-    Type: "AWS::EFS::MountTarget"
-    Properties:
-      FileSystemId: "fs-066e8e211309d0777"
-      SubnetId: "subnet-088f40d103e0fe35a"
-      SecurityGroups:
-        - !Ref EFSSecurityGroup
-  EFSMountTargetB:
-    Type: "AWS::EFS::MountTarget"
-    Properties:
-      FileSystemId: "fs-066e8e211309d0777"
-      SubnetId: "subnet-0313ec7cf5d6a4b01"
-      SecurityGroups:
-        - !Ref EFSSecurityGroup
 
   EC2SecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
@@ -84,7 +70,7 @@ Resources:
           yum update -y
           yum install -y nfs-utils
           mkdir /mnt/efs
-          mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 ${EFSMountTargetA}.fs-066e8e211309d0777.efs.us-east-1.amazonaws.com:/ /mnt/efs
+          mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fsmt-02694f114dc19687e.fs-066e8e211309d0777.efs.us-east-1.amazonaws.com:/ /mnt/efs
   EC2InstanceB:
     Type: "AWS::EC2::Instance"
     Properties:
@@ -103,7 +89,7 @@ Resources:
           yum update -y
           yum install -y nfs-utils
           mkdir /mnt/efs
-          mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 ${EFSMountTargetB}.fs-066e8e211309d0777.efs.us-east-1.amazonaws.com:/ /mnt/efs
+          mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fsmt-0edc804abcb113ec1.fs-066e8e211309d0777.efs.us-east-1.amazonaws.com:/ /mnt/efs
 
   LoadBalancerSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
