@@ -75,18 +75,6 @@ Resources:
           PrivateIpAddress: "10.0.0.10"
           GroupSet:
             - !Ref EC2SecurityGroup
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          yum -y update
-          yum -y install amazon-efs-utils
-          mount -t efs fs-066e8e211309d0777:/ /var/www/
-          echo 'fs-066e8e211309d0777:/ /var/www/ efs defaults,_netdev 0 0' >> /etc/fstab
-          mount -a
-          yum -y install httpd
-          echo '<html><body><h1>My EFS Web Server</h1></body></html>' > /var/www/html/index.html
-          systemctl start httpd
-          systemctl enable httpd
       Tags:
         - Key: Name
           Value: WordpressEC2ZoneA
@@ -102,18 +90,6 @@ Resources:
           PrivateIpAddress: "10.0.16.10"
           GroupSet:
             - !Ref EC2SecurityGroup
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          yum -y update
-          yum -y install amazon-efs-utils
-          mount -t efs fs-066e8e211309d0777:/ /var/www/
-          echo 'fs-066e8e211309d0777:/ /var/www/ efs defaults,_netdev 0 0' >> /etc/fstab
-          mount -a
-          yum -y install httpd
-          echo '<html><body><h1>My EFS Web Server</h1></body></html>' > /var/www/html/index.html
-          systemctl start httpd
-          systemctl enable httpd
       Tags:
         - Key: Name
           Value: WordpressEC2ZoneB

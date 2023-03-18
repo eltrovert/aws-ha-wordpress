@@ -3,13 +3,24 @@ on:
   workflow_dispatch:
 jobs:
   deploy:
+    name: Deploy WordPress
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
+    - name: Checkout code
       uses: actions/checkout@v2
+
+    - name: Configure SSH key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        name: ec2_key
+
     - name: Install Ansible
       run: sudo apt-get update && sudo apt-get install -y ansible
+
     - name: Run Ansible playbook
       run: ansible-playbook ansible/wordpress.yml
       env:
-        ANSIBLE_HOST_KEY_CHECKING: false
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
