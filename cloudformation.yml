@@ -80,8 +80,8 @@ Resources:
           #!/bin/bash
           yum -y update
           yum -y install amazon-efs-utils
-          mount -t efs ${FileSystemId}:/ /var/www/
-          echo '${FileSystemId}:/ /var/www/ efs defaults,_netdev 0 0' >> /etc/fstab
+          mount -t efs fs-066e8e211309d0777:/ /var/www/
+          echo 'fs-066e8e211309d0777:/ /var/www/ efs defaults,_netdev 0 0' >> /etc/fstab
           mount -a
           yum -y install httpd
           echo '<html><body><h1>My EFS Web Server</h1></body></html>' > /var/www/html/index.html
@@ -107,8 +107,8 @@ Resources:
           #!/bin/bash
           yum -y update
           yum -y install amazon-efs-utils
-          mount -t efs ${FileSystemId}:/ /var/www/
-          echo '${FileSystemId}:/ /var/www/ efs defaults,_netdev 0 0' >> /etc/fstab
+          mount -t efs fs-066e8e211309d0777:/ /var/www/
+          echo 'fs-066e8e211309d0777:/ /var/www/ efs defaults,_netdev 0 0' >> /etc/fstab
           mount -a
           yum -y install httpd
           echo '<html><body><h1>My EFS Web Server</h1></body></html>' > /var/www/html/index.html
