@@ -1,0 +1,3 @@
+boto3==1.18.60
+botocore==1.21.60
+ansible==2.9.20
