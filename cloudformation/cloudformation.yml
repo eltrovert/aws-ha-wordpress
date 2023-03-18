@@ -172,6 +172,3 @@ Resources:
       LoadBalancerArn: !Ref LoadBalancer
       Port: 80
       Protocol: "HTTP"
-      Tags:
-        - Key: Name
-          Value: WordpressListener
