@@ -10,7 +10,7 @@ After the CloudFormation Stacks are deployed, another GitHub Actions is use for 
 # Architecture
 The following diagram shows the architecture of the AWS Cloud deployment:
 
-![Architecture diagram](architecture.png)
+![Architecture diagram](assets/aws-ha-wordpresspng.png)
 
 
 ## Prerequisites
