@@ -9,6 +9,9 @@ Resources:
           ToPort: 3306
           CidrIp: "0.0.0.0/0"
       VpcId: "vpc-05c8f743e67755bc3" 
+      Tags:
+        - Key: Name
+          Value: WordpressRDSSG
   RDSInstance:
     Type: "AWS::RDS::DBInstance"
     Properties:
@@ -25,7 +28,9 @@ Resources:
         - !Ref RDSSecurityGroup
       MultiAZ: false
       PubliclyAccessible: false
-
+      Tags:
+        - Key: Name
+          Value: WordpressRDS
 
   EFSSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
@@ -37,6 +42,9 @@ Resources:
           ToPort: 2049
           CidrIp: "0.0.0.0/0"
       VpcId: "vpc-05c8f743e67755bc3" 
+      Tags:
+        - Key: Name
+          Value: WordpressEFSSG
 
   EC2SecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
@@ -52,6 +60,9 @@ Resources:
           ToPort: 80
           CidrIp: "0.0.0.0/0"
       VpcId: "vpc-05c8f743e67755bc3" 
+      Tags:
+        - Key: Name
+          Value: WordpressEC2SG
   EC2InstanceA:
     Type: "AWS::EC2::Instance"
     Properties:
@@ -67,10 +78,18 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
-          yum update -y
-          yum install -y nfs-utils
-          mkdir /mnt/efs
-          mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fsmt-02694f114dc19687e.fs-066e8e211309d0777.efs.us-east-1.amazonaws.com:/ /mnt/efs
+          yum -y update
+          yum -y install amazon-efs-utils
+          mount -t efs ${FileSystemId}:/ /var/www/
+          echo '${FileSystemId}:/ /var/www/ efs defaults,_netdev 0 0' >> /etc/fstab
+          mount -a
+          yum -y install httpd
+          echo '<html><body><h1>My EFS Web Server</h1></body></html>' > /var/www/html/index.html
+          systemctl start httpd
+          systemctl enable httpd
+      Tags:
+        - Key: Name
+          Value: WordpressEC2ZoneA
   EC2InstanceB:
     Type: "AWS::EC2::Instance"
     Properties:
@@ -86,10 +105,18 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
-          yum update -y
-          yum install -y nfs-utils
-          mkdir /mnt/efs
-          mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fsmt-0edc804abcb113ec1.fs-066e8e211309d0777.efs.us-east-1.amazonaws.com:/ /mnt/efs
+          yum -y update
+          yum -y install amazon-efs-utils
+          mount -t efs ${FileSystemId}:/ /var/www/
+          echo '${FileSystemId}:/ /var/www/ efs defaults,_netdev 0 0' >> /etc/fstab
+          mount -a
+          yum -y install httpd
+          echo '<html><body><h1>My EFS Web Server</h1></body></html>' > /var/www/html/index.html
+          systemctl start httpd
+          systemctl enable httpd
+      Tags:
+        - Key: Name
+          Value: WordpressEC2ZoneB
 
   LoadBalancerSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
@@ -101,6 +128,9 @@ Resources:
           ToPort: 80
           CidrIp: "0.0.0.0/0"
       VpcId: "vpc-05c8f743e67755bc3" 
+      Tags:
+        - Key: Name
+          Value: WordpressLBSG
   LoadBalancer:
     Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
     Properties:
@@ -111,6 +141,9 @@ Resources:
         - "subnet-0313ec7cf5d6a4b01"
       SecurityGroups:
         - !Ref LoadBalancerSecurityGroup
+      Tags:
+        - Key: Name
+          Value: WordpressLB
   TargetGroup:
     Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
     Properties:
@@ -127,6 +160,9 @@ Resources:
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       UnhealthyThresholdCount: 5
+      Tags:
+        - Key: Name
+          Value: WordpressTG
   Listener:
     Type: "AWS::ElasticLoadBalancingV2::Listener"
     Properties:
@@ -136,3 +172,6 @@ Resources:
       LoadBalancerArn: !Ref LoadBalancer
       Port: 80
       Protocol: "HTTP"
+      Tags:
+        - Key: Name
+          Value: WordpressListener
