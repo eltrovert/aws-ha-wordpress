@@ -37,6 +37,12 @@ repository
 │   └── workflows
 │       └── cloudformation.yml
 │       └── ansible.yml
+├── ansible-docker
+│   ├── Dockefile
+│   ├── README.md
+├── wp-clo-docker
+│   ├── Dockerfile
+│   ├── add_post.sh
 └── README.md
 
 ```
