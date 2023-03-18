@@ -61,8 +61,10 @@ The .github/workflows directory contains GitHub Actions workflows for automatica
 
 - `cloudformation.yml`: This is the GitHub Actions workflow file that creates the AWS Stack using the cloudformation.yml template file whenever a commit is made to the main branch. 
 
-This is the result of the GitHub Workflows
+## Result
+- This is the result of the GitHub Workflows
 ![Cloud Formation Result](assets/GithubActionResult.png)
+- This is the result of Cloud Formation
 ![Cloud Formation Result](assets/CloudFormationResult.png)
 
 ## README.md
