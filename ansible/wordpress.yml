@@ -1,0 +1,35 @@
+---
+- hosts: all
+  become: true
+  vars:
+    db_name: "wordpress"
+    db_user: "wordpress"
+    db_password: "password"
+  tasks:
+  - name: Install PHP and dependencies
+    apt:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - php-fpm
+      - php-mysql
+      - php-xml
+      - php-mbstring
+      - php-gd
+  - name: Install Apache2
+    apt:
+      name: httpd
+      state: present
+  - name: Configure MariaDB
+    mysql_user:
+      name: "{{ db_user }}"
+      password: "{{ db_password }}"
+      priv: "{{ db_name }}.*:ALL"
+      state: present
+    tags: [mariadb]
+  - name: Install WordPress
+    unarchive:
+      src: https://wordpress.org/latest.tar.gz
+      dest: /var/www/html
+      remote_src: true
+    tags: [wordpress]

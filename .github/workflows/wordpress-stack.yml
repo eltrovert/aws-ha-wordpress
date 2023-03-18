@@ -1,8 +1,6 @@
 name: Deploy AWS CloudFormation Stack
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -16,11 +14,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
       - name: Validate CloudFormation stack
-        run: aws cloudformation validate-template --template-body file://cloudformation.yml
+        run: aws cloudformation validate-template --template-body file://cloudformation/cloudformation.yml
       - name: Deploy CloudFormation stack
         run: |
           aws cloudformation deploy \
           --stack-name wordpress-stack \
-          --template-file cloudformation.yml \
+          --template-file cloudformation/cloudformation.yml \
           --capabilities CAPABILITY_NAMED_IAM \
           --region us-east-1 
