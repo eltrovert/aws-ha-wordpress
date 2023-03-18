@@ -59,7 +59,10 @@ The .github/workflows directory contains GitHub Actions workflows for automatica
 
 - `ansible.yml`: This is the GitHub Actions workflow file that runs the wordpress.yml Ansible playbook on the EC2 instances after they are created by CloudFormation.
 
-- `cloudformation.yml`: This is the GitHub Actions workflow file that creates the AWS Stack using the cloudformation.yml template file whenever a commit is made to the main branch. This is the result:
+- `cloudformation.yml`: This is the GitHub Actions workflow file that creates the AWS Stack using the cloudformation.yml template file whenever a commit is made to the main branch. 
+
+This is the result of the GitHub Workflows
+![Cloud Formation Result](assets/GithubActionResult.png)
 ![Cloud Formation Result](assets/CloudFormationResult.png)
 
 ## README.md
